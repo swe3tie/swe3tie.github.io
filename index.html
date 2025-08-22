@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@swe3tie</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fira+Mono&display=swap"
+      rel="stylesheet"
+    >
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      rel="stylesheet"
+    >
+    <link rel="icon" type="image/png" href="favicon.png">
+    <style>
+      body {
+        margin: 0;
+        font-family: "Fira Mono", monospace;
+        color: #e2e2ff;
+        background: #000;
+        overflow: hidden;
+      }
+
+      #bg {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        background: #000;
+      }
+
+      .container {
+        position: relative;
+        z-index: 1;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .card {
+        border: 1px solid #babaff;
+        padding: 1.5rem; /* was 3rem */
+        text-align: left;
+        width: 500px;
+        min-height: 200px; /* increase height */
+        background: rgba(0, 0, 0, 0.7);
+      }
+
+      .card h1 {
+        min-height: 3rem;
+        display: block;
+        margin: 0;
+        font-size: 2rem;
+        position: relative;
+      }
+
+      .card p {
+        font-size: 1rem;
+        margin: 1rem 0;
+      }
+
+      .links {
+        margin-top: 1rem;
+        text-align: center;
+      }
+
+      .links a {
+        display: inline-block;
+        margin: 0 0.5rem;
+        padding: 0.6rem 1.2rem;
+        border: 2px solid #e2e2ff;
+        color: #e2e2ff;
+        text-decoration: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: bold;
+        background: transparent;
+        transition: all 0.3s ease;
+      }
+
+      .links a:hover {
+        color: #fff;
+        text-shadow: 0 0 2px #fff, 0 0 4px #fff, 0 0 6px #fff, 0 0 8px #e6b3ff;
+        border-color: #e6b3ff;
+      }
+
+      #typewriter {
+        min-height: 4rem; /* enough space for ~3 lines */
+        display: block;
+        font-size: 1.02rem;
+      }
+      .title {
+        font-size: 1.5rem;
+      }
+      .badge {
+        display: inline-block;
+        padding: 0.1rem 0.4rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        font-size: 0.75rem;
+        line-height: 1rem;
+      }
+      .favicon {
+        position: absolute;
+        top: 0.8rem;
+        right: 0.8rem;
+        width: 24px;
+        height: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="bg"></canvas>
+
+    <div class="container">
+      <div class="card">
+        <img type="image/png" href="favicon.png" class="favicon">
+        <small
+          ><span class="badge">swe3tie</span> •
+          <span class="badge">he/him</span> •
+          <span class="badge"><span id="age"></span> years old</span></small
+        >
+        <div class="title">Hi. I'm <b>swe3tie</b></div>
+        <p id="typewriter"></p>
+        <div class="links">
+          <a href="mailto:dradangsuy@gmail.com">
+            <i class="fas fa-envelope fa-lg"></i> email
+          </a>
+          <a href="https://github.com/swe3tie" target="_blank">
+            <i class="fab fa-github fa-lg"></i> github
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const canvas = document.getElementById("bg");
+      const ctx = canvas.getContext("2d");
+      let stars = [];
+      let mouse = { x: null, y: null };
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      window.addEventListener("resize", resize);
+      resize();
+
+      // calculate number of stars based on screen area
+      const area = window.innerWidth * window.innerHeight;
+      let starCount = Math.floor(area / 10000); // 1 star per 20k pixels
+      starCount = Math.max(50, Math.min(300, starCount)); // clamp between 50–300
+
+      for (let i = 0; i < starCount; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: Math.random() * 1.5,
+          dx: (Math.random() - 0.5) * 0.5,
+          dy: (Math.random() - 0.5) * 0.5,
+        });
+      }
+
+      window.addEventListener("mousemove", (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+      });
+      window.addEventListener("mouseout", () => {
+        mouse.x = null;
+        mouse.y = null;
+      });
+
+      function draw() {
+        ctx.fillStyle = "#000";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.strokeStyle = "rgba(255,255,255,0.2)";
+        ctx.beginPath();
+        for (let i = 0; i < stars.length; i++) {
+          let s = stars[i];
+          ctx.moveTo(s.x, s.y);
+          for (let j = i + 1; j < stars.length; j++) {
+            let s2 = stars[j];
+            let dx = s.x - s2.x;
+            let dy = s.y - s2.y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 100) {
+              ctx.moveTo(s.x, s.y);
+              ctx.lineTo(s2.x, s2.y);
+            }
+          }
+
+          // connect star to mouse if close
+          if (mouse.x !== null && mouse.y !== null) {
+            let dxm = s.x - mouse.x;
+            let dym = s.y - mouse.y;
+            let distm = Math.sqrt(dxm * dxm + dym * dym);
+            if (distm < 150) {
+              ctx.moveTo(s.x, s.y);
+              ctx.lineTo(mouse.x, mouse.y);
+            }
+          }
+        }
+        ctx.stroke();
+
+        for (let s of stars) {
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = "#fff";
+          ctx.fill();
+
+          s.x += s.dx;
+          s.y += s.dy;
+
+          if (s.x < 0) s.x = canvas.width;
+          if (s.x > canvas.width) s.x = 0;
+          if (s.y < 0) s.y = canvas.height;
+          if (s.y > canvas.height) s.y = 0;
+        }
+
+        requestAnimationFrame(draw);
+      }
+      draw();
+      const text = `Welcome to my little corner on the internet.
+I make, bake and break software (and sometimes hardware) for the most random projects :p.`;
+      const typewriterEl = document.getElementById("typewriter");
+      let idx = 0;
+
+      function type() {
+        if (idx < text.length) {
+          let char = text[idx];
+          if (char === "\n") {
+            typewriterEl.innerHTML += "<br>";
+          } else {
+            typewriterEl.innerHTML += char;
+          }
+          idx++;
+          setTimeout(type, 50); // typing speed
+        }
+      }
+
+      type();
+      function calculateAge(birthday) {
+        const now = new Date();
+        const diff = now - birthday;
+        const years = diff / (1000 * 60 * 60 * 24 * 365.2425);
+        return years.toFixed(8);
+      }
+
+      function updateAge() {
+        const bday = new Date(2012, 9, 5); // Tháng 9 vì JS đếm từ 0
+        document.getElementById("age").textContent = calculateAge(bday);
+        requestAnimationFrame(updateAge);
+      }
+
+      updateAge();
+    </script>
+  </body>
+</html>
